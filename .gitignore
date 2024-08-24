@@ -1,0 +1,21 @@
+# Next.js
+client/.next/
+client/out/
+client/node_modules/
+
+# Python
+server/venv/
+__pycache__/
+*.pyc
+
+# Environment variables
+.env
+.env.local
+
+# IDE files
+.vscode/
+.idea/
+
+# OS files
+.DS_Store
+Thumbs.db
