@@ -3,7 +3,7 @@ from flask_cors import CORS
 
 # app instance
 app = Flask(__name__)
-CORS(app, resources={r"/api/*": {"origins": ["https://your-nextjs-frontend-url.vercel.app"]}})
+CORS(app, resources={r"/api/*": {"origins": ["https://nextjs-python-server.vercel.app"]}})
 
 @app.route("/api/home", methods=['GET'])
 def return_home():
