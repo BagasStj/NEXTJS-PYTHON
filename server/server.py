@@ -62,7 +62,7 @@ def speech_to_text():
         logger.info("Transcription successful")
         return jsonify({"text": response.text})
     except Exception as e:
-        logger.error(f"Error during transcription: {str(e)}")
+        logger.error(f"Error during transcription: {str(e)}", exc_info=True)
         return jsonify({'error': str(e)}), 500
 
 @app.route("/api/text-to-speech", methods=['POST'])
@@ -79,17 +79,12 @@ def text_to_speech():
 
     try:
         logger.info("Sending request to ElevenLabs API")
-        # ElevenLabs API endpoint
         url = "https://api.elevenlabs.io/v1/text-to-speech/21m00Tcm4TlvDq8ikWAM"
-
-        # Headers
         headers = {
             "Accept": "audio/mpeg",
             "Content-Type": "application/json",
             "xi-api-key": ELEVENLABS_API_KEY
         }
-
-        # Data
         data = {
             "text": text,
             "model_id": "eleven_multilingual_v2",
@@ -98,20 +93,18 @@ def text_to_speech():
                 "similarity_boost": 0.5
             }
         }
-
-        # Make the request
         response = requests.post(url, json=data, headers=headers)
-
+        logger.info(f"ElevenLabs API response status: {response.status_code}")
+        
         if response.status_code == 200:
             logger.info("Text-to-speech conversion successful")
-            # Return the audio data as a streaming response
             return Response(response.content, mimetype="audio/mpeg")
         else:
             logger.error(f"ElevenLabs API error: {response.status_code}")
+            logger.error(f"ElevenLabs API response: {response.text}")
             return jsonify({'error': f"ElevenLabs API error: {response.status_code}"}), 500
-
     except Exception as e:
-        logger.error(f"Error during text-to-speech conversion: {str(e)}")
+        logger.error(f"Error during text-to-speech conversion: {str(e)}", exc_info=True)
         return jsonify({'error': str(e)}), 500
 
 if __name__ == "__main__":
