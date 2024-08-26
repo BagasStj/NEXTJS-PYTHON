@@ -273,20 +273,20 @@ const VoiceRecorder: React.FC = () => {
     }
   };
 
-  // const getTest = async () => {
-  //   const ttsResponse = await fetch('http://127.0.0.1:8080/api/home', {
-  //     method: 'GET',
-  //     headers: {
-  //       'Content-Type': 'application/json',
-  //     },
-  //   });
-  //   console.log(ttsResponse);
-  // }
+  const getTest = async () => {
+    const ttsResponse = await fetch('https://nextjs-python-server.vercel.app/api/home', {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
+    console.log(ttsResponse);
+  }
 
 
-  // useEffect(() => {
-  //   getTest()
-  // }, []);
+  useEffect(() => {
+    getTest()
+  }, []);
 
 
 
