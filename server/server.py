@@ -107,6 +107,16 @@ def text_to_speech():
         logger.error(f"Error during text-to-speech conversion: {str(e)}", exc_info=True)
         return jsonify({'error': str(e)}), 500
 
+@app.route("/api/check", methods=['GET'])
+def check_server():
+    openai_key = os.getenv('OPENAI_API_KEY')
+    elevenlabs_key = os.getenv('ELEVENLABS_API_KEY')
+    return jsonify({
+        'server': 'running',
+        'openai_key_set': bool(openai_key),
+        'elevenlabs_key_set': bool(elevenlabs_key)
+    })
+
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 8080))
     app.run(host="0.0.0.0", port=port)
