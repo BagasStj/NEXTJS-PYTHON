@@ -9,6 +9,8 @@ import { Slider } from "@/components/ui/slider"
 import { Card, CardContent, CardTitle } from "@/components/ui/card"
 import { Dialog, DialogContent } from "@/components/ui/dialog"
 import { Mic } from 'lucide-react';
+import { useToast } from "@/components/ui/use-toast"
+import { ToastAction } from "@/components/ui/toast"
 
 const DEFAULT_PROMPT: any = {
   id: 'default',
@@ -48,6 +50,7 @@ const VoiceRecorder: React.FC = () => {
   const [isloading, setIsloading] = useState(false)
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [isasking, setIsasking] = useState(false)
+  const { toast } = useToast()
 
   const startRecording = async () => {
     setIsasking(true)
@@ -166,6 +169,12 @@ const VoiceRecorder: React.FC = () => {
       setLangChainResponse(data.response);
     } catch (error) {
       console.error('Error calling API:', error);
+      toast({
+        variant: "destructive",
+        title: "API Error",
+        description: "There was a problem with the chat API.",
+        action: <ToastAction altText="Try again">Try again</ToastAction>,
+      })
     }
   };
 
@@ -183,6 +192,9 @@ const VoiceRecorder: React.FC = () => {
         method: 'POST',
         body: formData,
       });
+      if (!response.ok) {
+        throw new Error(`Transcription error! status: ${response.status}`);
+      }
       const data = await response.json();
       setTranscription(data.text);
 
@@ -205,7 +217,7 @@ const VoiceRecorder: React.FC = () => {
       });
 
       if (!langChainResponse.ok) {
-        throw new Error(`HTTP error! status: ${langChainResponse.status}`);
+        throw new Error(`LangChain error! status: ${langChainResponse.status}`);
       }
 
       const langChainData = await langChainResponse.json();
@@ -249,6 +261,15 @@ const VoiceRecorder: React.FC = () => {
       // Don't automatically restart recording here
     } catch (error) {
       console.error('Error in sendAudioToServer:', error);
+      toast({
+        variant: "destructive",
+        title: "API Error",
+        description: error instanceof Error ? error.message : "An unknown error occurred",
+        action: <ToastAction altText="Try again">Try again</ToastAction>,
+      })
+    } finally {
+      setIsloading(false)
+      setIsasking(false)
     }
   };
 
