@@ -237,11 +237,12 @@ const VoiceRecorder: React.FC = () => {
           audioRef.current.src = url;
           audioRef.current.play();
         }
+        setIsloading(false);
+      setIsasking(false);
       }
 
       // startRecording();
-      setIsloading(false);
-      setIsasking(false);
+      
       // Clear the chunks for the next recording
       chunksRef.current = [];
 

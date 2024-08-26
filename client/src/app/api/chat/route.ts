@@ -9,8 +9,14 @@ const memory = new BufferMemory({
     memoryKey: "history",
 });
 
+const openAIApiKey = process.env.OPENAI_API_KEY
 export async function POST(request: Request) {
     const { messages, model, temperature, topP, presencePenalty, frequencyPenalty, maxTokens, prompt } = await request.json();
+
+    if(!openAIApiKey){
+        alert('OPENAI_API_KEY is not set')
+        return NextResponse.json({ error: 'OPENAI_API_KEY is not set' }, { status: 500 });
+    }
 
     const chatModel = new ChatOpenAI({
         modelName: model,
@@ -19,7 +25,7 @@ export async function POST(request: Request) {
         presencePenalty,
         frequencyPenalty,
         maxTokens,
-        openAIApiKey: process.env.OPENAI_API_KEY,
+        openAIApiKey: openAIApiKey,
     });
 
     const chatPrompt = ChatPromptTemplate.fromPromptMessages([
