@@ -188,7 +188,7 @@ const VoiceRecorder: React.FC = () => {
       const blob = new Blob(chunksRef.current, { type: 'audio/webm' });
       const formData = new FormData();
       formData.append('file', blob, 'audio.webm');
-      const response = await fetch('http://127.0.0.1:8080/api/transcribe', {
+      const response = await fetch('https://nextjs-python-server.vercel.app/api/transcribe', {
         method: 'POST',
         body: formData,
       });
@@ -229,7 +229,7 @@ const VoiceRecorder: React.FC = () => {
 
       if (langChainData.response != '') {
 
-        const ttsResponse = await fetch('http://127.0.0.1:8080/api/text-to-speech', {
+        const ttsResponse = await fetch('https://nextjs-python-server.vercel.app/api/text-to-speech', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
