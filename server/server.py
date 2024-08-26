@@ -26,7 +26,7 @@ class NamedBytesIO(io.BytesIO):
 
 # app instance
 app = Flask(__name__)
-CORS(app)  # Enable CORS for all routes
+CORS(app, resources={r"/api/*": {"origins": ["https://nextjs-python-server.vercel.app"]}})  # Enable CORS for all routes
 
 # Initialize the OpenAI client
 client = OpenAI(api_key=os.getenv('OPENAI_API_KEY'))
@@ -44,6 +44,8 @@ def return_home():
 @app.route("/api/transcribe", methods=['POST'])
 def speech_to_text():
     logger.info("Transcribe endpoint accessed")
+    logger.info(f"Request headers: {request.headers}")
+    logger.info(f"Request files: {request.files}")
     audio_file = request.files.get('file')
     if not audio_file:
         logger.error("No audio file provided")
@@ -67,6 +69,8 @@ def speech_to_text():
 @app.route("/api/text-to-speech", methods=['POST'])
 def text_to_speech():
     logger.info("Text-to-speech endpoint accessed")
+    logger.info(f"Request headers: {request.headers}")
+    logger.info(f"Request data: {request.json}")
     data = request.json
     text = data.get('text')
 
@@ -112,5 +116,5 @@ def text_to_speech():
         return jsonify({'error': str(e)}), 500
 
 if __name__ == "__main__":
-    logger.info(f"Starting Flask app on port {os.environ.get('PORT', 8080)}")
-    app.run(host="0.0.0.0", port=int(os.environ.get("PORT", 8080)), debug=True)
+    port = int(os.environ.get("PORT", 8080))
+    app.run(host="0.0.0.0", port=port)
