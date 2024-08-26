@@ -117,7 +117,7 @@ const VoiceRecorder: React.FC = () => {
 
   const initRecording = async () => {
     setIsDialogOpen(true);
-    const ttsResponse = await fetch('http://127.0.0.1:8080/api/text-to-speech', {
+    const ttsResponse = await fetch('https://nextjs-python-server.vercel.app/api/text-to-speech', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
