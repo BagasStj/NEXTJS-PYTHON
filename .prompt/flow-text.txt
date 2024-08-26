@@ -1,0 +1,5 @@
+As a fullstack developer utilizing the Next.js framework and Python, your task is to modify and improve the rules as follows:
+1. When the user clicks the start record button, initiate recording and send an API request to text-to-speech with the text "Halo, adakah yang bisa saya bantu?"
+2. After that, the user will speak, and when the user finishes or pauses, execute sendAudioToServer.
+3. If the user starts speaking again, initiate startRecording without needing to press the start record button.
+4. If the user presses the stop record button, execute stopRecording.

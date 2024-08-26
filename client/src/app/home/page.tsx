@@ -1,20 +1,12 @@
 'use client'
-import { useEffect, useState } from 'react';
+import VoiceRecorder from '@/components/VoiceRecorder';
 
 export default function Home() {
-  const [message, setMessage] = useState('');
-
-  useEffect(() => {
-    fetch('https://nextjs-python-server.vercel.app/api/home')
-      .then(response => response.json())
-      .then(data => setMessage(data.message))
-      .catch(error => console.error('Error fetching data:', error));
-  }, []);
-
   return (
-    <main className="flex min-h-screen flex-col items-center justify-between p-24">
-      <h1>Welcome to Home Page</h1>
-      <p>Message from API: {message}</p>
+    <main className="flex min-h-screen w-full items-center justify-center p-4 sm:p-6 md:p-8 lg:p-12">
+      <div className="w-full max-w-4xl h-[calc(100vh-2rem)] sm:h-[calc(100vh-3rem)] md:h-[calc(100vh-4rem)] lg:h-[calc(100vh-6rem)]">
+        <VoiceRecorder />
+      </div>
     </main>
   );
 }
