@@ -26,8 +26,7 @@ class NamedBytesIO(io.BytesIO):
 
 # app instance
 app = Flask(__name__)
-CORS(app, resources={r"/api/*": {"origins": ["https://nextjs-python-server.vercel.app"]}})  # Enable CORS for all routes
-
+CORS(app, resources={r"/api/*": {"origins": "*"}})  # Allow all origins for API routes
 # Initialize the OpenAI client
 client = OpenAI(api_key=os.getenv('OPENAI_API_KEY'))
 

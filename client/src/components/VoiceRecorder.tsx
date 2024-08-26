@@ -284,9 +284,9 @@ const VoiceRecorder: React.FC = () => {
   }
 
 
-  useEffect(() => {
-    getTest()
-  }, []);
+  // useEffect(() => {
+  //   getTest()
+  // }, []);
 
 
 
