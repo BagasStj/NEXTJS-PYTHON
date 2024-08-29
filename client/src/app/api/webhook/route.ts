@@ -1,15 +1,31 @@
 import { NextRequest, NextResponse } from 'next/server';
 
 export async function POST(req: NextRequest) {
+  return handleWebhook(req);
+}
+
+export async function GET(req: NextRequest) {
+  return handleWebhook(req);
+}
+
+async function handleWebhook(req: NextRequest) {
   try {
-    const body = await req.json();
-    const {  sender, message } = body;
+    let sender, message;
+
+    if (req.method === 'POST') {
+      const body = await req.json();
+      ({ sender, message } = body);
+    } else if (req.method === 'GET') {
+      const params = new URL(req.url).searchParams;
+      sender = params.get('sender');
+      message = params.get('message');
+    }
 
     // Proses pesan yang diterima
-    console.log('Pesan diterima:', {  sender, message });
+    console.log('Pesan diterima:', { sender, message });
 
     // Kirim balasan
-    const response = await sendReply(sender,"Terima kasih atas pesannya!");
+    const response = await sendReply(sender, "Terima kasih atas pesannya!");
 
     return NextResponse.json({ success: true, response });
   } catch (error) {
