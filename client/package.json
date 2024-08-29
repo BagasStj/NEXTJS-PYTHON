@@ -5,7 +5,7 @@
   "scripts": {
     "dev": "next dev",
     "start:dev": "PORT=3000 next dev",
-    "dev2": "next dev -H 192.168.1.43",
+    "dev2": "next dev -H 192.168.1.7",
     "build": "next build",
     "start": "next start",
     "lint": "next lint"

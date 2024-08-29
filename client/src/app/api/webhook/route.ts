@@ -3,10 +3,10 @@ import { NextRequest, NextResponse } from 'next/server';
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
-    const { device, sender, message, payload } = body;
+    const {  sender, message } = body;
 
     // Proses pesan yang diterima
-    console.log('Pesan diterima:', { device, sender, message, payload });
+    console.log('Pesan diterima:', {  sender, message });
 
     // Kirim balasan
     const response = await sendReply(sender, 'Terima kasih atas pesannya!');
