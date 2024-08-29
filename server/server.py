@@ -6,6 +6,7 @@ from openai import OpenAI
 import io
 import requests
 from dotenv import load_dotenv
+from natural_sql_model import  generate_sql
 
 # Set up logging
 logging.basicConfig(level=logging.INFO)
@@ -29,7 +30,6 @@ app = Flask(__name__)
 CORS(app, resources={r"/api/*": {"origins": "*"}})  # Allow all origins for API routes
 # Initialize the OpenAI client
 client = OpenAI(api_key=os.getenv('OPENAI_API_KEY'))
-
 # ElevenLabs API key
 ELEVENLABS_API_KEY = os.getenv('ELEVENLABS_API_KEY')
 
@@ -102,7 +102,7 @@ def text_to_speech():
         else:
             logger.error(f"ElevenLabs API error: {response.status_code}")
             logger.error(f"ElevenLabs API response: {response.text}")
-            return jsonify({'error': f"ElevenLabs API error: {response.status_code}"}), 500
+            return jsonify({'error': f"ElevenLabs API error: {response.text}"}), 500
     except Exception as e:
         logger.error(f"Error during text-to-speech conversion: {str(e)}", exc_info=True)
         return jsonify({'error': str(e)}), 500
@@ -116,6 +116,29 @@ def check_server():
         'openai_key_set': bool(openai_key),
         'elevenlabs_key_set': bool(elevenlabs_key)
     })
+
+# @app.route("/api/natural-sql", methods=['POST'])
+# def natural_sql_query():
+#     logger.info("Natural SQL endpoint accessed")
+#     data = request.json
+#     natural_query = data.get('query')
+
+#     if not natural_query:
+#         logger.error("No query provided for Natural SQL")
+#         return jsonify({'error': 'No query provided'}), 400
+
+#     try:
+#         logger.info(f"Processing Natural SQL query: {natural_query}")
+#         sql_query = generate_sql(tokenizer, model, natural_query)
+#         logger.info(f"Generated SQL query: {sql_query}")
+        
+#         return jsonify({
+#             'natural_query': natural_query,
+#             'sql_query': sql_query,
+#         })
+#     except Exception as e:
+#         logger.error(f"Error during Natural SQL processing: {str(e)}", exc_info=True)
+#         return jsonify({'error': str(e)}), 500
 
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 8080))

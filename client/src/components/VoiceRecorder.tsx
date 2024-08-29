@@ -8,7 +8,7 @@ import { Label } from "@/components/ui/label"
 import { Slider } from "@/components/ui/slider"
 import { Card, CardContent, CardTitle } from "@/components/ui/card"
 import { Dialog, DialogContent } from "@/components/ui/dialog"
-import { Mic } from 'lucide-react';
+import { Mic, MicOff } from 'lucide-react';
 import { useToast } from "@/components/ui/use-toast"
 import { ToastAction } from "@/components/ui/toast"
 
@@ -41,6 +41,7 @@ const VoiceRecorder: React.FC = () => {
       titlePrompt: 'New Chat',
     }
   )
+  const [firstMessage, setFirstMessage] = useState<string | null>('hai, adakaha yang bisa saya bantu');
   const [chatHistory, setChatHistory] = useState<{ id: string; title: string; messages: any[]; timestamp: number; prompt: string }[]>([])
   const [currentChatId, setCurrentChatId] = useState<string | null>(null);
   const [audioUrl, setAudioUrl] = useState<string | null>(null);
@@ -53,7 +54,6 @@ const VoiceRecorder: React.FC = () => {
   const { toast } = useToast()
 
   const startRecording = async () => {
-    setIsasking(true)
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
       mediaRecorderRef.current = new MediaRecorder(stream, { mimeType: 'audio/webm' });
@@ -117,12 +117,13 @@ const VoiceRecorder: React.FC = () => {
 
   const initRecording = async () => {
     setIsDialogOpen(true);
-    const ttsResponse = await fetch('https://nextjs-python-server.vercel.app/api/text-to-speech', {
+    setIsasking(true)
+    const ttsResponse = await fetch('http://127.0.0.1:8080/api/text-to-speech', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({ text: 'haiii , adakaha yang bisa saya bantu' }),
+      body: JSON.stringify({ text: firstMessage || 'haiii , adakaha yang bisa saya bantu' }),
     });
 
     if (!ttsResponse.ok) {
@@ -188,7 +189,7 @@ const VoiceRecorder: React.FC = () => {
       const blob = new Blob(chunksRef.current, { type: 'audio/webm' });
       const formData = new FormData();
       formData.append('file', blob, 'audio.webm');
-      const response = await fetch('https://nextjs-python-server.vercel.app/api/transcribe', {
+      const response = await fetch('http://127.0.0.1:8080/api/transcribe', {
         method: 'POST',
         body: formData,
       });
@@ -229,7 +230,7 @@ const VoiceRecorder: React.FC = () => {
 
       if (langChainData.response != '') {
 
-        const ttsResponse = await fetch('https://nextjs-python-server.vercel.app/api/text-to-speech', {
+        const ttsResponse = await fetch('http://127.0.0.1:8080/api/text-to-speech', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -249,12 +250,12 @@ const VoiceRecorder: React.FC = () => {
           audioRef.current.src = url;
           audioRef.current.play();
         }
-        setIsloading(false);
-      setIsasking(false);
       }
+      setIsloading(false);
+      setIsasking(false);
 
       // startRecording();
-      
+
       // Clear the chunks for the next recording
       chunksRef.current = [];
 
@@ -274,7 +275,7 @@ const VoiceRecorder: React.FC = () => {
   };
 
   const getTest = async () => {
-    const ttsResponse = await fetch('https://nextjs-python-server.vercel.app/api/home', {
+    const ttsResponse = await fetch('http://127.0.0.1:8080/api/home', {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',
@@ -316,7 +317,7 @@ const VoiceRecorder: React.FC = () => {
         <Button
           onClick={initRecording}
           variant="secondary"
-          className="bg-gray-200 hover:bg-gray-300 text-gray-800"
+          className="bg-gray-800 hover:bg-gray-500 text-white"
         >
           {'Start Asking'}
         </Button>
@@ -337,61 +338,24 @@ const VoiceRecorder: React.FC = () => {
           )}
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="prompt">Prompt</Label>
+              <Label htmlFor="prompt">First Message</Label>
               <Input
+                id="prompt"
+                value={firstMessage || ''}
+                onChange={(e) => setFirstMessage(e.target.value)}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="prompt">Prompt</Label>
+              <textarea
                 id="prompt"
                 value={params.prompt}
                 onChange={(e) => setParams({ ...params, prompt: e.target.value })}
+                className="w-full p-2 border border-gray-300 rounded"
+                rows={4}
               />
             </div>
-            <div className="space-y-2">
-              <Label htmlFor="model">Model</Label>
-              <Input
-                id="model"
-                value={params.model}
-                onChange={(e) => setParams({ ...params, model: e.target.value })}
-              />
-            </div>
-            <div className="space-y-2">
-              <Label>Temperature: {params.temperature}</Label>
-              <Slider
-                value={[params.temperature]}
-                min={0}
-                max={1}
-                step={0.01}
-                onValueChange={(value) => setParams({ ...params, temperature: value[0] })}
-              />
-            </div>
-            <div className="space-y-2">
-              <Label>Top P: {params.topP}</Label>
-              <Slider
-                value={[params.topP]}
-                min={0}
-                max={1}
-                step={0.01}
-                onValueChange={(value) => setParams({ ...params, topP: value[0] })}
-              />
-            </div>
-            <div className="space-y-2">
-              <Label>Presence Penalty: {params.presencePenalty}</Label>
-              <Slider
-                value={[params.presencePenalty]}
-                min={0}
-                max={2}
-                step={0.01}
-                onValueChange={(value) => setParams({ ...params, presencePenalty: value[0] })}
-              />
-            </div>
-            <div className="space-y-2">
-              <Label>Frequency Penalty: {params.frequencyPenalty}</Label>
-              <Slider
-                value={[params.frequencyPenalty]}
-                min={0}
-                max={2}
-                step={0.01}
-                onValueChange={(value) => setParams({ ...params, frequencyPenalty: value[0] })}
-              />
-            </div>
+
             <div className="space-y-2">
               <Label htmlFor="maxTokens">Max Tokens</Label>
               <Input
@@ -400,6 +364,48 @@ const VoiceRecorder: React.FC = () => {
                 value={params.maxTokens}
                 onChange={(e) => setParams({ ...params, maxTokens: parseInt(e.target.value) })}
               />
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label>Temperature: {params.temperature}</Label>
+                <Slider
+                  value={[params.temperature]}
+                  min={0}
+                  max={1}
+                  step={0.01}
+                  onValueChange={(value) => setParams({ ...params, temperature: value[0] })}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label>Top P: {params.topP}</Label>
+                <Slider
+                  value={[params.topP]}
+                  min={0}
+                  max={1}
+                  step={0.01}
+                  onValueChange={(value) => setParams({ ...params, topP: value[0] })}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label>Presence Penalty: {params.presencePenalty}</Label>
+                <Slider
+                  value={[params.presencePenalty]}
+                  min={0}
+                  max={2}
+                  step={0.01}
+                  onValueChange={(value) => setParams({ ...params, presencePenalty: value[0] })}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label>Frequency Penalty: {params.frequencyPenalty}</Label>
+                <Slider
+                  value={[params.frequencyPenalty]}
+                  min={0}
+                  max={2}
+                  step={0.01}
+                  onValueChange={(value) => setParams({ ...params, frequencyPenalty: value[0] })}
+                />
+              </div>
             </div>
           </form>
         </div>
@@ -418,10 +424,19 @@ const VoiceRecorder: React.FC = () => {
               onClick={handleMicrophoneClick}
               className="cursor-pointer"
             >
-              <Mic
-                size={64}
-                color={isasking ? 'blue' : 'red'}
-              />
+              {
+                isasking ? (
+                  <Mic
+                    size={64}
+                    color='blue'
+                  />
+                ) : (
+                  <MicOff
+                    size={64}
+                    color='red'
+                  />
+                )
+              }
             </div>
             <div className={`mt-4 flex space-x-1 ${isSpeaking ? '' : 'invisible'}`}>
               {[0, 1, 2, 3].map((i) => (
