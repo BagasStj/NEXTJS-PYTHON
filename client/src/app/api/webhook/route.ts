@@ -24,10 +24,15 @@ async function handleWebhook(req: NextRequest) {
     // Proses pesan yang diterima
     console.log('Pesan diterima:', { sender, message });
 
-    // Kirim balasan
-    const response = await sendReply(sender, "HALOO , Terima kasih atas pesannya!");
+    // dijawab oleh flowiseAI
+    const response = await flowiseAI(message);
 
-    return NextResponse.json({ success: true, response });
+    const reply = response.text;
+
+    const sendReplyResponse = await sendReply(sender, reply);
+    
+
+    return NextResponse.json({ success: true, sendReplyResponse });
   } catch (error) {
     console.error('Error:', error);
     return NextResponse.json({ success: false, error: 'Internal Server Error' }, { status: 500 });
@@ -51,4 +56,23 @@ async function sendReply(to: string, message: string) {
   });
 
   return response.json();
+}
+
+async function flowiseAI(input: string) {
+  const url = 'https://flowiseai-railway-production-9629.up.railway.app/api/v1/prediction/2f25175a-5c6f-474a-918a-84ae054a92d8';
+
+  const responses = await fetch(url, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      question: input,
+      overrideConfig: {
+        systemMessagePrompt: "Kamu adalah seorang asisten AI , jawab pertanyaan dengan singkat dan jelas",
+      }
+    }),
+  });
+
+  return responses.json();
 }
