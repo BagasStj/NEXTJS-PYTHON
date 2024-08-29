@@ -25,7 +25,7 @@ async function handleWebhook(req: NextRequest) {
     console.log('Pesan diterima:', { sender, message });
 
     // Kirim balasan
-    const response = await sendReply(sender, "Terima kasih atas pesannya!");
+    const response = await sendReply(sender, "HALOO , Terima kasih atas pesannya!");
 
     return NextResponse.json({ success: true, response });
   } catch (error) {
