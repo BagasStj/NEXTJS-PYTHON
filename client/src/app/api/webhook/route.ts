@@ -24,7 +24,7 @@ async function handleWebhook(req: NextRequest) {
     // Proses pesan yang diterima
     console.log('Pesan diterima:', { sender, message });
     const greetings = ['hi', 'hello','hai','hallo', 'selamat pagi', 'selamat siang', 'selamat sore', 'selamat malam'];
-    if (greetings.some(greeting => message.includes(greeting))) {
+    if (greetings.some(greeting => message.toLowerCase().includes(greeting))) {
       let reply = 'Hai!👋 Saya adalah bot interaktif yang siap membantu Anda 🥰. Saya bisa menjawab pertanyaan Anda tentang pasal undang undang  perlindungan data pribadidengan menggunakan bahasa sehari-hari yang Anda gunakan, yuk tanyakan saja! 🚀';
       await sendReply(sender, reply);
       return NextResponse.json({
