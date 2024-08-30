@@ -10,7 +10,7 @@ export async function GET(req: NextRequest) {
 
 async function handleWebhook(req: NextRequest) {
   try {
-    let sender, message;
+    let sender, message :any;
 
     if (req.method === 'POST') {
       const body = await req.json();
@@ -23,6 +23,13 @@ async function handleWebhook(req: NextRequest) {
 
     // Proses pesan yang diterima
     console.log('Pesan diterima:', { sender, message });
+    const greetings = ['hi', 'hello', 'selamat pagi', 'selamat siang', 'selamat sore', 'selamat malam'];
+    if (greetings.some(greeting => message.includes(greeting))) {
+      return NextResponse.json({
+        role: 'assistant',
+        content: 'Hai!👋 Saya adalah bot interaktif yang siap membantu Anda 🥰. Saya bisa menjawab pertanyaan Anda tentang pasal undang undang  perlindungan data pribadidengan menggunakan bahasa sehari-hari yang Anda gunakan, yuk tanyakan saja! 🚀'
+      });
+    }
 
     // dijawab oleh flowiseAI
     const response = await flowiseAI(message);
@@ -59,7 +66,7 @@ async function sendReply(to: string, message: string) {
 }
 
 async function flowiseAI(input: string) {
-  const url = 'https://flowiseai-railway-production-9629.up.railway.app/api/v1/prediction/2f25175a-5c6f-474a-918a-84ae054a92d8';
+  const url = 'https://flowiseai-railway-production-9629.up.railway.app/api/v1/prediction/b28deb38-fd23-42bc-be1d-f9a8e033a305';
 
   const responses = await fetch(url, {
     method: 'POST',
@@ -68,9 +75,6 @@ async function flowiseAI(input: string) {
     },
     body: JSON.stringify({
       question: input,
-      overrideConfig: {
-        systemMessagePrompt: "Kamu adalah seorang asisten AI , jawab pertanyaan dengan singkat dan jelas",
-      }
     }),
   });
 
