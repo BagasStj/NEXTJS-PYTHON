@@ -22,7 +22,7 @@ async function handleWebhook(req: NextRequest) {
             message = params.get('message');
         }
 
-        console.log('Pesan diterima:', { sender, message }, await redisClient.get(sender));
+        console.log('Pesan diterima:', { sender, message }, redisClient.get(sender));
         const greetings = ['hi', 'hello', 'hai', 'hallo', 'selamatpagi', 'selamatsiang', 'selamatsore', 'selamatmalam', 'start'];
         const menuText = ['registrasirawatjalan', 'riwayatmedis', 'penjadwalankonsultasi', 'bpjsdanasuransi', 'pembayarandanpenagihan'];
 
@@ -53,8 +53,10 @@ async function handleWebhook(req: NextRequest) {
 
             // cek nik ke databse
             const storedMessage = await redisClient.get(sender);
-            if (storedMessage === 'nik_done') {
+            console.log('Stored message:', storedMessage);
+            if (storedMessage == 'nik_done') {
                 const response = await flowiseAI(message);
+                console.log('Response flow 1:', response);
                 if (response.text == 'Tidak ada hasil yang ditemukan dalam database.') {
                     await sendReply(sender, 'Maaf , Untuk saat ini data yang anda masukan belum ada di sistem kami 😔');
                     return NextResponse.json({
