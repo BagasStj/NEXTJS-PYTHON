@@ -24,7 +24,7 @@ async function handleWebhook(req: NextRequest) {
         }
 
         // Proses pesan Starting
-        console.log('Pesan diterima:', { sender, message });
+        console.log('Pesan diterima:', { sender, message } , messageStore.getMessage(sender));
         const greetings = ['hi', 'hello', 'hai', 'hallo', 'selamatpagi', 'selamatsiang', 'selamatsore', 'selamatmalam' ,'start'];
         const menuNumber = ['1', '2', '3', '4', '5'];
         const menuText = ['registrasirawatjalan', 'riwayatmedis', 'penjadwalankonsultasi', 'bpjsdanasuransi', 'pembayarandanpenagihan'];
@@ -38,7 +38,7 @@ async function handleWebhook(req: NextRequest) {
                 });
             }
 
-            if (menuNumber.some(menu => message.toLowerCase().replace(/\s+/g, '').includes(menu)) || menuText.some(menu => message.toLowerCase().replace(/\s+/g, '').includes(menu))) {
+            if (message == '2' || menuText.some(menu => message.toLowerCase().replace(/\s+/g, '').includes(menu))) {
                 let reply = "Anda telah memilih menu " + message + " \n Tolong Inputkan NIK anda untuk mengakses fitur tersebut";
                 messageStore.setMessage(sender, 'nik_done');
                 await sendReply(sender, reply);
@@ -48,7 +48,7 @@ async function handleWebhook(req: NextRequest) {
                 });
             }
 
-            if (messageStore.getMessage(sender) === 'nik_done') {
+            if (messageStore.getMessage(sender) == 'nik_done' ) {
                 const response = await flowiseAI(message);
                 if(response.text == 'Tidak ada hasil yang ditemukan dalam database.'){
                     await sendReply(sender, 'Maaf , Untuk saat ini data yang anda masukan belum ada di sistem kami 😔');
