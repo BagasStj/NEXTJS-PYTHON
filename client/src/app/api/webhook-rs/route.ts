@@ -144,7 +144,7 @@ async function flowiseAIGeneral(input: string) {
 }
 
 async function flowiseAI(input: string) {
-    const url = 'https://flowiseai-railway-production-9629.up.railway.app/canvas/8c1c3efc-a126-46dd-8f44-63b233494d46';
+    const url = 'https://flowiseai-railway-production-9629.up.railway.app/api/v1/prediction/8c1c3efc-a126-46dd-8f44-63b233494d46';
 
     const responses = await fetch(url, {
         method: 'POST',
