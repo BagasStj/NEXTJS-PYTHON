@@ -1,4 +1,4 @@
-import messageStore from '@/lib/messageStore';
+import redisClient from '@/lib/redisClient';
 import { NextRequest, NextResponse } from 'next/server';
 
 export async function POST(req: NextRequest) {
@@ -10,7 +10,6 @@ export async function GET(req: NextRequest) {
 }
 
 async function handleWebhook(req: NextRequest) {
-    
     try {
         let sender, message: any;
 
@@ -23,41 +22,48 @@ async function handleWebhook(req: NextRequest) {
             message = params.get('message');
         }
 
-        // Proses pesan Starting
-        console.log('Pesan diterima:', { sender, message } , messageStore.getMessage(sender));
-        const greetings = ['hi', 'hello', 'hai', 'hallo', 'selamatpagi', 'selamatsiang', 'selamatsore', 'selamatmalam' ,'start'];
-        const menuNumber = ['1', '2', '3', '4', '5'];
+        console.log('Pesan diterima:', { sender, message }, await redisClient.get(sender));
+        const greetings = ['hi', 'hello', 'hai', 'hallo', 'selamatpagi', 'selamatsiang', 'selamatsore', 'selamatmalam', 'start'];
         const menuText = ['registrasirawatjalan', 'riwayatmedis', 'penjadwalankonsultasi', 'bpjsdanasuransi', 'pembayarandanpenagihan'];
+
         if (message != null) {
+            // Proses pesan Starting
             if (greetings.some(greeting => message.toLowerCase().replace(/\s+/g, '').includes(greeting))) {
                 let reply = "Hai!👋 Saya adalah bot interaktif yang siap membantu Anda 😁. Silahkan pilih menu unutk mengakses fiture dari bot interaktif ini : \n \n   *1. Registrasi Rawat Jalan* \n   *2. Riwayat Medis*\n   *3. Penjadwalan Konsultasi*\n   *4. BPJS dan Asuransi* \n   *5. Pembayaran dan Penagihan*  \n \nAnda Hanya perlu menginputkan nomor menu atau ketik menu tersebut sebagai contoh `2` atau `Riwayat Medis`   \n \n  *Terimakasih* 🥰";
+                await redisClient.set(sender, '1'); // Set message to 1
+                console.log('Set message to 1 for sender:', sender);
                 await sendReply(sender, reply);
                 return NextResponse.json({
                     success: true,
-                    reply: reply 
+                    reply: reply
                 });
             }
 
+            // Proses Input NIK
             if (message == '2' || menuText.some(menu => message.toLowerCase().replace(/\s+/g, '').includes(menu))) {
                 let reply = "Anda telah memilih menu " + message + " \n Tolong Inputkan NIK anda untuk mengakses fitur tersebut";
-                messageStore.setMessage(sender, 'nik_done');
+                await redisClient.set(sender, 'nik_done');
+                console.log('Set message to nik_done for sender:', sender);
                 await sendReply(sender, reply);
                 return NextResponse.json({
                     success: true,
-                    reply: reply 
+                    reply: reply
                 });
             }
 
-            if (messageStore.getMessage(sender) == 'nik_done' ) {
+            // cek nik ke databse
+            const storedMessage = await redisClient.get(sender);
+            if (storedMessage === 'nik_done') {
                 const response = await flowiseAI(message);
-                if(response.text == 'Tidak ada hasil yang ditemukan dalam database.'){
+                if (response.text == 'Tidak ada hasil yang ditemukan dalam database.') {
                     await sendReply(sender, 'Maaf , Untuk saat ini data yang anda masukan belum ada di sistem kami 😔');
                     return NextResponse.json({
                         success: true,
                         reply: response
                     });
                 }
-                messageStore.setMessage(sender, 'biodata_done');
+                await redisClient.set(sender, 'biodata_done');
+                console.log('Set message to biodata_done for sender:', sender);
                 await sendReply(sender, response.text);
                 return NextResponse.json({
                     success: true,
@@ -65,7 +71,6 @@ async function handleWebhook(req: NextRequest) {
                 });
             }
         }
-
 
         // dijawab oleh flowiseAI
         const response = await flowiseAIGeneral(message);
@@ -92,7 +97,6 @@ async function handleWebhook(req: NextRequest) {
         const reply = response.text;
 
         const sendReplyResponse = await sendReply(sender, reply);
-
 
         return NextResponse.json({ success: true, sendReplyResponse });
     } catch (error) {
@@ -129,14 +133,13 @@ async function flowiseAIGeneral(input: string) {
             'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-            chatId : "77cf063c-6ed6-4592-bdc8-b89a0a162af9",
+            chatId: "77cf063c-6ed6-4592-bdc8-b89a0a162af9",
             question: input,
         }),
     });
 
     return responses.json();
 }
-
 
 async function flowiseAI(input: string) {
     const url = 'https://flowiseai-railway-production-9629.up.railway.app/canvas/8c1c3efc-a126-46dd-8f44-63b233494d46';
