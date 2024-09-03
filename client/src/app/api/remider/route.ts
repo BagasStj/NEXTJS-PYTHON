@@ -1,6 +1,5 @@
 import { Pool, PoolClient } from 'pg';
 import { NextResponse } from 'next/server';
-import { sendReply } from '../webhook-rs/route';
 
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
@@ -23,7 +22,7 @@ async function listenForChanges() {
     client.on('notification', async (msg: { payload?: string }) => {
       const payload: AntrianPayload = JSON.parse(msg.payload || '{}');
       const message = `Halo ${payload.username}, nomor antrian Anda: ${payload.no_antrian} untuk tanggal ${payload.date}.`;
-      await sendReply(payload.nomor_hp, message);
+      await sendReply('081334319568', message);
     });
 
     // Keep the connection alive
@@ -42,4 +41,23 @@ listenForChanges();
 
 export async function GET() {
   return NextResponse.json({ status: 'Listener active for SampleDataNomorAntrian' });
+}
+
+async function sendReply(to: string, message: string) {
+    const url = 'https://api.fonnte.com/send';
+    const token = process.env.FONNTE_TOKEN;
+
+    const response = await fetch(url, {
+        method: 'POST',
+        headers: {
+            'Authorization': token || '',
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+            target: to,
+            message: message,
+        }),
+    });
+
+    return response.json();
 }
