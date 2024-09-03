@@ -61,8 +61,8 @@ async function handleWebhook(req: NextRequest) {
             const storedMessage = await redisClient.get(sender);
             const storedMenu = await redisClient.get(sender + "_menu");
             console.log('Stored message:', storedMessage, storedMenu);
-            if (storedMessage == 'nik_done' && (storedMenu == '2' || storedMenu == 'riwayatmedis')) {
-                const systemMessagePrompt = 'Given an input question, first construct a syntactically correct {dialect} query to run, then look at the query results and return the answer. Unless the user specifies in their question a specific number of examples they want to get, always limit your query to a maximum of {top_k} results. You can sort the results by relevant columns to return the most interesting examples in the database.the given data is patient data with their disease, \n if the user asks about the disease they are suffering from, answer by referring to the disease columnif there is a question "sebutkan biodata dari {input}", then answer with an example "Berdasarkan NIK 330111, nama anda adalah Ali Nasgor, mempunyai nomor bpjs ketenagakerjaan 001135 dengan masa berlaku sampai 2024-06-23" . If the question relates to information that is not in this database, answer with "No results found in the database." \n Never ask for all columns from a given table, ask for only a few columns that are relevant to the question.Be careful to only use column names that you can see in the schema description. Be careful not to ask for columns that do not exist. Also pay attention to which columns are in which tables.Please answer in Indonesian \n Use the following format:\nQuestion: "Question here"\nSQLQuery: "SQL query to be executed"\n SQLResult: "Result of SQLQuery\n"Answer: "Final answer here"Use only the tables listed below.\n{table_info}\nQuestion: {input}'
+            if (storedMessage == 'nik_done' || (storedMenu == '2' || storedMenu == 'riwayatmedis')) {
+                const systemMessagePrompt = 'Given an input question, first construct a syntactically correct {dialect} query to run, then look at the query results and return the answer. Unless the user specifies in their question a specific number of examples they want to get, always limit your query to a maximum of {top_k} results. You can sort the results by relevant columns to return the most interesting examples in the database.the given data is patient data with their disease,   if the user asks about the disease they are suffering from, answer by referring to the disease columnif there is a question "sebutkan biodata dari {input}", then answer with an example "Berdasarkan NIK 330111, nama anda adalah Ali Nasgor, mempunyai nomor bpjs ketenagakerjaan 001135 dengan masa berlaku sampai 2024-06-23" . If the question relates to information that is not in this database, answer with "No results found in the database."   Never ask for all columns from a given table, ask for only a few columns that are relevant to the question.Be careful to only use column names that you can see in the schema description. Be careful not to ask for columns that do not exist. Also pay attention to which columns are in which tables.Please answer in Indonesian   Use the following format: Question: "Question here" SQLQuery: "SQL query to be executed"  SQLResult: "Result of SQLQuery "Answer: "Final answer here"Use only the tables listed below. {table_info} Question: {input}'
                 const response = await flowiseAI(message, systemMessagePrompt, 'SampleDataPasien');
                 console.log('Response flow 1:', response);
                 if (response.text == 'Tidak ada hasil yang ditemukan dalam database.' || response.text == 'No results found in the database.') {
@@ -75,7 +75,7 @@ async function handleWebhook(req: NextRequest) {
                 await redisClient.set(sender, 'biodata_done');
                 console.log('Set message to biodata_done for sender:', sender);
                 await sendReply(sender, response.text);
-                await flowiseAIGeneral(response.text.replace('anda', 'aku'), systemMessagePrompt2);
+                await flowiseAIGeneral(response.text.replace('anda', 'aku'), systemMessagePrompt2 ,sender);
                 return NextResponse.json({
                     success: true,
                     reply: response
@@ -83,8 +83,8 @@ async function handleWebhook(req: NextRequest) {
             }
 
             // BPJS DAN ASURANSI
-            if (storedMessage == 'nik_done' && (storedMenu == '4' || storedMenu == 'bpjsdanasuransi')) {
-                const systemMessagePrompt = 'Given an input question, first construct a syntactically correct {dialect} query to run, then look at the query results and return the answer. Unless the user specifies in their question a specific number of examples they want to get, always limit your query to a maximum of {top_k} results. You can sort the results by relevant columns to return the most interesting examples in the database.the given data is patient data with their disease, \n if there is a question "sebutkan biodata dari {input}", then answer with an example "Berdasarkan NIK 330111, nama anda adalah Ali Nasgor, anda memiliki riwayat penyakit asma, adakah yang ingin anda tanyakan dengan penyakit asma" . If the question relates to information that is not in this database, answer with "No results found in the database." \n Never ask for all columns from a given table, ask for only a few columns that are relevant to the question.Be careful to only use column names that you can see in the schema description. Be careful not to ask for columns that do not exist. Also pay attention to which columns are in which tables.Please answer in Indonesian \n Use the following format:\nQuestion: "Question here"\nSQLQuery: "SQL query to be executed"\n SQLResult: "Result of SQLQuery\n"Answer: "Final answer here"Use only the tables listed below.\n{table_info}\nQuestion: {input}'
+            if (storedMessage == 'nik_done' || (storedMenu == '4' || storedMenu == 'bpjsdanasuransi')) {
+                const systemMessagePrompt = 'Given an input question, first construct a syntactically correct {dialect} query to run, then look at the query results and return the answer. Unless the user specifies in their question a specific number of examples they want to get, always limit your query to a maximum of {top_k} results. You can sort the results by relevant columns to return the most interesting examples in the database.the given data is patient data with their disease,   if there is a question "sebutkan biodata dari {input}", then answer with an example "Berdasarkan NIK 330111, nama anda adalah Ali Nasgor, anda memiliki riwayat penyakit asma, adakah yang ingin anda tanyakan dengan penyakit asma" . If the question relates to information that is not in this database, answer with "No results found in the database."   Never ask for all columns from a given table, ask for only a few columns that are relevant to the question.Be careful to only use column names that you can see in the schema description. Be careful not to ask for columns that do not exist. Also pay attention to which columns are in which tables.Please answer in Indonesian   Use the following format: Question: "Question here" SQLQuery: "SQL query to be executed"  SQLResult: "Result of SQLQuery "Answer: "Final answer here"Use only the tables listed below. {table_info} Question: {input}'
                 const response = await flowiseAI(message, systemMessagePrompt, 'SampleDataBPJSAsuransi');
                 console.log('Response flow 1:', response);
                 if (response.text == 'Tidak ada hasil yang ditemukan dalam database.' || response.text == 'No results found in the database.') {
@@ -97,7 +97,7 @@ async function handleWebhook(req: NextRequest) {
                 await redisClient.set(sender, 'biodata_done');
                 console.log('Set message to biodata_done for sender:', sender);
                 await sendReply(sender, response.text);
-                await flowiseAIGeneral(response.text.replace('anda', 'aku'), ststemMessagePrompt4);
+                await flowiseAIGeneral(response.text.replace('anda', 'aku'), ststemMessagePrompt4 ,sender);
                 return NextResponse.json({
                     success: true,
                     reply: response
@@ -114,7 +114,7 @@ async function handleWebhook(req: NextRequest) {
             } else {
                 prompt = ststemMessagePrompt4
             }
-            let response :any = await flowiseAIGeneral(message, prompt );
+            let response :any = await flowiseAIGeneral(message, prompt  ,sender);
     
             if (response.text == 'Tidak ada hasil yang ditemukan dalam database.' || response.text == 'Jawaban: Tidak ada data yang ditemukan untuk isi dari data pribadi.') {
                 const reply = response.text;
@@ -162,7 +162,7 @@ async function sendReply(to: string, message: string) {
     return response.json();
 }
 
-async function flowiseAIGeneral(input: string, systemMessagePrompt: string) {
+async function flowiseAIGeneral(input: string, systemMessagePrompt: string , sessionid :any) {
     const url = 'https://flowiseai-railway-production-9629.up.railway.app/api/v1/prediction/c6ff5c51-b0d5-4875-a994-463ed49f0b25';
 
     const responses = await fetch(url, {
@@ -172,7 +172,8 @@ async function flowiseAIGeneral(input: string, systemMessagePrompt: string) {
         },
         body: JSON.stringify({
             question: input,
-            systemMessagePrompt: systemMessagePrompt
+            systemMessagePrompt: systemMessagePrompt,
+            sessionId:sessionid
         }),
     });
 
