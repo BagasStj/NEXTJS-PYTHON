@@ -5,19 +5,16 @@ import os
 from openai import OpenAI
 import io
 import requests
-from dotenv import load_dotenv
-from natural_sql_model import  generate_sql
+
 
 # Set up logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-# Load environment variables
-load_dotenv()
 
 logger.info("Environment variables loaded:")
-logger.info(f"OPENAI_API_KEY: {'*' * len(os.getenv('OPENAI_API_KEY', ''))}")
-logger.info(f"ELEVENLABS_API_KEY: {'*' * len(os.getenv('ELEVENLABS_API_KEY', ''))}")
+logger.info(f"OPENAI_API_KEY: {'*' * len(os.getenv('OPENAI_API_KEY' ,''))}")
+logger.info(f"ELEVENLABS_API_KEY: {'*' * len(os.getenv('ELEVENLABS_API_KEY' ,''))}")
 
 # Custom class to add a name attribute to BytesIO
 class NamedBytesIO(io.BytesIO):
@@ -29,9 +26,9 @@ class NamedBytesIO(io.BytesIO):
 app = Flask(__name__)
 CORS(app, resources={r"/api/*": {"origins": "*"}})  # Allow all origins for API routes
 # Initialize the OpenAI client
-client = OpenAI(api_key=os.getenv('OPENAI_API_KEY'))
+client = OpenAI(api_key=os.getenv('OPENAI_API_KEY' ,''))
 # ElevenLabs API key
-ELEVENLABS_API_KEY = os.getenv('ELEVENLABS_API_KEY')
+ELEVENLABS_API_KEY = os.getenv('ELEVENLABS_API_KEY' ,'')
 
 @app.route("/api/home", methods=['GET'])
 def return_home():
@@ -117,28 +114,6 @@ def check_server():
         'elevenlabs_key_set': bool(elevenlabs_key)
     })
 
-# @app.route("/api/natural-sql", methods=['POST'])
-# def natural_sql_query():
-#     logger.info("Natural SQL endpoint accessed")
-#     data = request.json
-#     natural_query = data.get('query')
-
-#     if not natural_query:
-#         logger.error("No query provided for Natural SQL")
-#         return jsonify({'error': 'No query provided'}), 400
-
-#     try:
-#         logger.info(f"Processing Natural SQL query: {natural_query}")
-#         sql_query = generate_sql(tokenizer, model, natural_query)
-#         logger.info(f"Generated SQL query: {sql_query}")
-        
-#         return jsonify({
-#             'natural_query': natural_query,
-#             'sql_query': sql_query,
-#         })
-#     except Exception as e:
-#         logger.error(f"Error during Natural SQL processing: {str(e)}", exc_info=True)
-#         return jsonify({'error': str(e)}), 500
 
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 8080))

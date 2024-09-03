@@ -4,6 +4,10 @@
     {
       "src": "server.py",
       "use": "@vercel/python"
+    },
+    {
+      "src": "psgre.py",
+      "use": "@vercel/python"
     }
   ],
   "routes": [
