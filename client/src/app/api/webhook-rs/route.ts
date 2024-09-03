@@ -143,7 +143,7 @@ async function handleWebhook(req: NextRequest) {
     }
 }
 
-async function sendReply(to: string, message: string) {
+export async function sendReply(to: string, message: string) {
     const url = 'https://api.fonnte.com/send';
     const token = process.env.FONNTE_TOKEN;
 
