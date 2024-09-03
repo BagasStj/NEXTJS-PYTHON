@@ -75,7 +75,7 @@ async function handleWebhook(req: NextRequest) {
                 await redisClient.set(sender, 'biodata_done');
                 console.log('Set message to biodata_done for sender:', sender);
                 await sendReply(sender, response.text);
-                await flowiseAIGeneral(response.text.replace('anda', 'aku'), systemMessagePrompt2 ,sender);
+                await flowiseAIGeneral(response.text.replace('anda', 'aku'), systemMessagePrompt2, sender);
                 return NextResponse.json({
                     success: true,
                     reply: response
@@ -97,7 +97,7 @@ async function handleWebhook(req: NextRequest) {
                 await redisClient.set(sender, 'biodata_done');
                 console.log('Set message to biodata_done for sender:', sender);
                 await sendReply(sender, response.text);
-                await flowiseAIGeneral(response.text.replace('anda', 'aku'), ststemMessagePrompt4 ,sender);
+                await flowiseAIGeneral(response.text.replace('anda', 'aku'), ststemMessagePrompt4, sender);
                 return NextResponse.json({
                     success: true,
                     reply: response
@@ -105,17 +105,17 @@ async function handleWebhook(req: NextRequest) {
             }
         }
         const storedMessage = await redisClient.get(sender);
-        const storedMenu = await redisClient.get(sender+"_menu");
+        const storedMenu = await redisClient.get(sender + "_menu");
         if (storedMessage == 'biodata_done') {
             // dijawab oleh flowiseAI
-            let prompt :any = systemMessagePrompt2
-            if(storedMenu == '2' || storedMenu == 'riwayatmedis'){
+            let prompt: any = systemMessagePrompt2
+            if (storedMenu == '2' || storedMenu == 'riwayatmedis') {
                 prompt = systemMessagePrompt2
             } else {
                 prompt = ststemMessagePrompt4
             }
-            let response :any = await flowiseAIGeneral(message, prompt  ,sender);
-    
+            let response: any = await flowiseAIGeneral(message, prompt, sender);
+
             if (response.text == 'Tidak ada hasil yang ditemukan dalam database.' || response.text == 'Jawaban: Tidak ada data yang ditemukan untuk isi dari data pribadi.') {
                 const reply = response.text;
                 await sendReply(sender, reply);
@@ -162,8 +162,8 @@ async function sendReply(to: string, message: string) {
     return response.json();
 }
 
-async function flowiseAIGeneral(input: string, systemMessagePrompt: string , sessionid :any) {
-    console.log("FLOWISEAIGENERAL", input , systemMessagePrompt , sessionid)
+async function flowiseAIGeneral(input: string, systemMessagePrompt: string, sessionid: any) {
+    console.log("FLOWISEAIGENERAL", input, systemMessagePrompt, sessionid)
     const url = 'https://flowiseai-railway-production-9629.up.railway.app/api/v1/prediction/c6ff5c51-b0d5-4875-a994-463ed49f0b25';
 
     const responses = await fetch(url, {
@@ -173,8 +173,10 @@ async function flowiseAIGeneral(input: string, systemMessagePrompt: string , ses
         },
         body: JSON.stringify({
             question: input,
-            systemMessagePrompt: systemMessagePrompt,
-            chatId : `0a9d3dff-265b-49a3-a41c-${sessionid}`
+            chatId: `0a9d3dff-265b-49a3-a41c-${sessionid}`,
+            overrideConfig: {
+                systemMessagePrompt: systemMessagePrompt,
+            }
         }),
     });
 
@@ -182,7 +184,7 @@ async function flowiseAIGeneral(input: string, systemMessagePrompt: string , ses
 }
 
 async function flowiseAI(input: string, systemMessagePrompt: string, tablle: string) {
-    console.log("FLOWISEAIGENERAL", input , systemMessagePrompt , tablle)
+    console.log("FLOWISEAIGENERAL", input, systemMessagePrompt, tablle)
     const url = 'https://flowiseai-railway-production-9629.up.railway.app/api/v1/prediction/8c1c3efc-a126-46dd-8f44-63b233494d46';
 
     const responses = await fetch(url, {
@@ -192,8 +194,11 @@ async function flowiseAI(input: string, systemMessagePrompt: string, tablle: str
         },
         body: JSON.stringify({
             question: `sebutkan biodata dari nik ${input}`,
-            includesTables: tablle,
-            customPrompt: systemMessagePrompt
+            overrideConfig: {
+                includesTables: tablle,
+                customPrompt: systemMessagePrompt
+            }
+
         }),
     });
 
